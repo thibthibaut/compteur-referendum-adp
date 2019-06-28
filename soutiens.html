@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="A layout example that shows off a responsive product landing page.">
+    <title>Compteur Référendum ADP</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" integrity="sha384-" crossorigin="anonymous">
+    
+    <!--[if lte IE 8]>
+        <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-old-ie-min.css">
+    <![endif]-->
+    <!--[if gt IE 8]><!-->
+        <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-min.css">
+    <!--<![endif]-->
+    
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css">
+    
+        <!--[if lte IE 8]>
+            <link rel="stylesheet" href="css/layouts/marketing-old-ie.css">
+        <![endif]-->
+        <!--[if gt IE 8]><!-->
+            <link rel="stylesheet" href="css/layouts/marketing.css">
+        <!--<![endif]-->
+
+<script
+  src="https://code.jquery.com/jquery-3.4.1.slim.min.js"
+  integrity="sha256-pasqAKBDmFT4eHoN2ndd6lN370kFiGUFyTiUHWhU7k8="
+  crossorigin="anonymous"></script>
+
+
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.css">
+  
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
+
+
+	<script type="text/javascript" src="./lib/zip.js"></script>
+	<script type="text/javascript" src="./lib/zip-ext.js"></script>
+
+</head>
+<body>
+
+
+<div class="content">
+		<h2 class="content-head is-center">Les soutiens</h2>
+		<h3 class="content-head is-center" id="load"> Décompression... </h3>
+
+			<table class="pure-table" id="datatable">
+					<thead>
+							<tr>
+									<th>Nom</th>
+									<th>Prénom</th>
+									<th>Lieu de vote</th>
+							</tr>
+					</thead>
+
+					<tbody id="table">
+
+					</tbody>
+			</table>
+		
+</div>
+
+	<script>
+
+	$.fn.dataTable.ext.errMode = 'none';
+
+		function handle_blob(data){
+
+			$("#load").html('lecture... (peut prendre du temps, jusqu\'à 60 secondes) <small> Éviter sur smartphone</small>')
+			var reader = new FileReader();
+			reader.onload = function(progressEvent){
+			var data = [];
+
+			var lines = this.result.split('\n')//.slice(0, 3);
+			for(var i = 0; i < lines.length; i++){
+				data.push(lines[i].split(',').slice(0,3));
+			}
+
+				$('#datatable').DataTable( {
+						data: data
+				});
+
+				$("#load").html('')
+			};
+			reader.readAsText(data);
+
+		}
+
+		zip.workerScriptsPath = "./lib/";
+
+		zip.createReader(new zip.HttpReader('./data.csv.zip'), function(zipReader) {
+    // get entries from the zip file
+    zipReader.getEntries(function(entries) {
+      // get data from the first file
+      entries[0].getData(new zip.BlobWriter("text/plain"), function(data) {
+        // close the reader and calls callback function with uncompressed data as parameter
+        zipReader.close();
+        handle_blob(data);
+      });
+    });
+  }, onerror);
+
+	</script>
+
+</body>
+</html>
